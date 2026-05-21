@@ -1,6 +1,6 @@
 import { Subject } from "../types/index.ts";
 
-export const mockSubjects: Subject[] = [
+export const MOCK_SUBJECTS: Subject[] = [
   {
     id: "sub-001",
     code: "CS101",
@@ -30,4 +30,4 @@ export const mockSubjects: Subject[] = [
   },
 ];
 
-export default mockSubjects;
+export default MOCK_SUBJECTS;
