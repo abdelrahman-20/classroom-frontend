@@ -53,7 +53,7 @@ export const EditViewHeader = ({
     titleFromProps ??
     getUserFriendlyName(
       resource?.meta?.label ?? identifier ?? resource?.name,
-      "plural"
+      "plural",
     );
 
   return (
@@ -71,14 +71,17 @@ export const EditViewHeader = ({
           "items-center",
           "justify-between",
           "-ml-2.5",
-          headerClassName
+          headerClassName,
         )}
       >
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={back}>
             <ArrowLeftIcon className="h-4 w-4" />
           </Button>
-          <h2 className="text-2xl font-bold">{title}</h2>
+          <h2 className="text-2xl font-bold">
+            {/* {title} */}
+            Classroom Management App
+          </h2>
         </div>
 
         <div className="flex items-center gap-2">

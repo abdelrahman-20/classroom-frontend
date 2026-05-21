@@ -256,7 +256,8 @@ function SidebarHeader() {
             },
           )}
         >
-          {title.text}
+          {/* {title.text} */}
+          Classroom Management App
         </h2>
       </div>
 
