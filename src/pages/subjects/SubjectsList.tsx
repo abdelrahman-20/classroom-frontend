@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DepartmentsOptions } from "@/constants";
+import { DEPARTMENT_OPTIONS } from "@/constants";
 import { Subject } from "@/types";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -60,7 +60,7 @@ const SubjectsList = () => {
       // Department Column
       {
         id: "department",
-        accessorKey: "department",
+        accessorKey: "department.name",
         size: 200,
         header: () => <p className="column-title">Department</p>,
         cell: ({ getValue }) => (
@@ -131,7 +131,7 @@ const SubjectsList = () => {
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
 
-                {DepartmentsOptions.map((dep) => {
+                {DEPARTMENT_OPTIONS.map((dep) => {
                   return (
                     <SelectItem key={dep.value} value={dep.value}>
                       {dep.label}
