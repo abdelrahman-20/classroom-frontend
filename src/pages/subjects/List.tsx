@@ -84,9 +84,9 @@ const SubjectsList = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <ShowButton size="sm" recordItemId={row.original.id} />
-              <EditButton size="sm" recordItemId={row.original.id} />
-              <DeleteButton size="sm" recordItemId={row.original.id} />
+              <ShowButton size="sm" recordItemId={row.original.id} disabled />
+              <EditButton size="sm" recordItemId={row.original.id} disabled />
+              <DeleteButton size="sm" recordItemId={row.original.id} disabled />
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -99,7 +99,7 @@ const SubjectsList = () => {
     columns,
     refineCoreProps: {
       resource: "subjects",
-      pagination: { mode: "client", currentPage: 1, pageSize: 2 },
+      pagination: { mode: "client" },
       filters: {},
       sorters: {},
     },

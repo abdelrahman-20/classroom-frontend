@@ -13,13 +13,13 @@ import type {
   GetListResponse,
 } from "@refinedev/core";
 
+const notImplemented = (action: string) => () => {
+  throw new Error(`${action} is not implemented for subjects.`);
+};
+
 export const dataProvider: DataProvider = {
-  getOne: () => {
-    throw new Error("Not implemented");
-  },
-  update: () => {
-    throw new Error("Not implemented");
-  },
+  getOne: notImplemented("getOne"),
+  update: notImplemented("update"),
   getList: async <
     TData extends BaseRecord = BaseRecord,
   >({}: GetListParams): Promise<GetListResponse<TData>> => {
@@ -28,12 +28,8 @@ export const dataProvider: DataProvider = {
       total: Mock_SUBJECTS.length,
     };
   },
-  create: () => {
-    throw new Error("Not implemented");
-  },
-  deleteOne: () => {
-    throw new Error("Not implemented");
-  },
+  create: notImplemented("create"),
+  deleteOne: notImplemented("deleteOne"),
   getApiUrl: () => "",
   // Optional methods:
   // getMany: () => { /* ... */ },
