@@ -36,7 +36,7 @@ export function DataTablePagination({
   total,
 }: DataTablePaginationProps) {
   const pageSizeOptions = useMemo(() => {
-    const baseOptions = [10, 20, 30, 40, 50];
+    const baseOptions = [10, 20, 30, 40, 50, 100];
     const optionsSet = new Set(baseOptions);
 
     if (!optionsSet.has(pageSize)) {
@@ -55,7 +55,7 @@ export function DataTablePagination({
         "flex-wrap",
         "px-2",
         "w-full",
-        "gap-2"
+        "gap-2",
       )}
     >
       <div
@@ -63,7 +63,7 @@ export function DataTablePagination({
           "flex-1",
           "text-sm",
           "text-muted-foreground",
-          "whitespace-nowrap"
+          "whitespace-nowrap",
         )}
       >
         {typeof total === "number" ? `${total} row(s)` : null}
@@ -94,7 +94,7 @@ export function DataTablePagination({
               "items-center",
               "justify-center",
               "text-sm",
-              "font-medium"
+              "font-medium",
             )}
           >
             Page {currentPage} of {pageCount}
