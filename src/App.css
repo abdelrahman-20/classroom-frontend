@@ -233,7 +233,7 @@
   }
 
   .search-field {
-    @apply relative w-full max-h-9 md:max-w-72;
+    @apply relative w-full max-h-9;
 
     .search-icon {
       @apply absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary;
