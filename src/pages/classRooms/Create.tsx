@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -46,7 +45,6 @@ function ClassCreate() {
       action: "create",
     },
   });
-
   const {
     handleSubmit,
     formState: { isSubmitting, errors },
@@ -76,7 +74,6 @@ function ClassCreate() {
   }
 
   const bannerPublicId = form.watch("bannerCldPubId");
-
   const setBannerImg = (file: any, field: any) => {
     if (file) {
       field.onChange(file.url);
@@ -121,8 +118,8 @@ function ClassCreate() {
               >
                 {/* Image-Upload */}
                 <Controller
-                  control={control}
                   name="bannerUrl"
+                  control={control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -137,7 +134,7 @@ function ClassCreate() {
                               ? { url: field.value, publicId: bannerPublicId }
                               : null
                           }
-                          onChange={(value: any) => setBannerImg(value, field)}
+                          onChange={(file: any) => setBannerImg(file, field)}
                         />
                       </FormControl>
 

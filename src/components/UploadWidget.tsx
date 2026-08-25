@@ -1,7 +1,10 @@
 import { UploadWidgetProps, UploadWidgetValue } from "@/types";
 import { UploadCloud } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import { CLOUDINARY_CLOUD_NAME, requireEnv } from "@/constants";
+import {
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_UPLOAD_PRESET,
+} from "@/constants";
 
 const UploadWidget = ({
   value = null,
@@ -16,7 +19,8 @@ const UploadWidget = ({
   const [isRemoving, setIsRemoving] = useState(false);
 
   const openWidget = () => {
-    if (!disabled) widgetRef.current?.open();
+    if (disabled || !widgetRef.current) return;
+    widgetRef.current.open();
   };
 
   useEffect(() => {
@@ -24,18 +28,19 @@ const UploadWidget = ({
   }, [onChange]);
 
   useEffect(() => {
+    setPreview(value ?? null);
+  }, [value]);
+
+  useEffect(() => {
     // Initialize Cloudinary upload widget once
     if (typeof window === "undefined" || widgetRef.current) return;
     if (!window.cloudinary?.createUploadWidget) return;
-
-    const uploadPreset =
-      (import.meta.env as any).VITE_CLOUDINARY_UPLOAD_PRESET ??
-      requireEnv("VITE_CLOUDINARY_UPLOAD_PRESET", "");
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return;
 
     widgetRef.current = window.cloudinary.createUploadWidget(
       {
         cloudName: CLOUDINARY_CLOUD_NAME,
-        uploadPreset,
+        uploadPreset: CLOUDINARY_UPLOAD_PRESET,
         multiple: false,
         cropping: false,
         resourceType: "image",
@@ -61,8 +66,10 @@ const UploadWidget = ({
   }, []);
 
   const removeFromCloudinary = async () => {
+    if (disabled || isRemoving) return;
     if (!deleteToken) {
       setPreview(null);
+      setDeleteToken(null);
       onChangeRef.current?.(null);
       return;
     }
@@ -92,6 +99,14 @@ const UploadWidget = ({
     }
   };
 
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    return (
+      <div className="rounded-md border border-dashed border-muted-foreground/40 p-3 text-sm text-muted-foreground">
+        Image upload is currently unavailable.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       {preview ? (
@@ -105,7 +120,7 @@ const UploadWidget = ({
             <button
               type="button"
               onClick={removeFromCloudinary}
-              disabled={isRemoving}
+              disabled={disabled || isRemoving}
               className="inline-flex items-center px-3 py-1.5 rounded-md bg-red-600 text-white"
             >
               {isRemoving ? "Removing..." : "Remove"}
@@ -119,7 +134,7 @@ const UploadWidget = ({
           tabIndex={0}
           onClick={openWidget}
           onKeyDown={(e) => {
-            if (e.key === "enter") {
+            if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               openWidget();
             }

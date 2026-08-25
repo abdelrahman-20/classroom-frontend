@@ -140,6 +140,7 @@ const SubjectsList = () => {
       <div className="flex flex-col gap-5 space-y-4">
         <p>Quick Access to essential metrics and management tools.</p>
 
+        {/* SEARCH, Filtering, & Create-Button */}
         <div className="flex flex-col gap-2">
           {/* Search-Field */}
           <div className="search-field">
