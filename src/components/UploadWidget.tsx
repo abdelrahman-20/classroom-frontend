@@ -1,10 +1,7 @@
 import { UploadWidgetProps, UploadWidgetValue } from "@/types";
 import { UploadCloud } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import {
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET,
-} from "@/constants";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/constants";
 
 const UploadWidget = ({
   value = null,
@@ -34,35 +31,50 @@ const UploadWidget = ({
   useEffect(() => {
     // Initialize Cloudinary upload widget once
     if (typeof window === "undefined" || widgetRef.current) return;
-    if (!window.cloudinary?.createUploadWidget) return;
     if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return;
 
-    widgetRef.current = window.cloudinary.createUploadWidget(
-      {
-        cloudName: CLOUDINARY_CLOUD_NAME,
-        uploadPreset: CLOUDINARY_UPLOAD_PRESET,
-        multiple: false,
-        cropping: false,
-        resourceType: "image",
-        clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
-        maxFileSize: 5 * 1024 * 1024, // 5MB
-        folder: "classroom-uploads",
-      },
-      (error, result) => {
-        if (error) return;
-        if (!result) return;
-        if (result.event === "success") {
-          const info = result.info;
-          const newVal: UploadWidgetValue = {
-            url: info.secure_url,
-            publicId: info.public_id,
-          };
-          setPreview(newVal);
-          setDeleteToken(info.delete_token ?? null);
-          onChangeRef.current?.(newVal);
-        }
-      },
-    );
+    const initializeWidget = () => {
+      if (!window.cloudinary?.createUploadWidget) return;
+
+      widgetRef.current = window.cloudinary.createUploadWidget(
+        {
+          cloudName: CLOUDINARY_CLOUD_NAME,
+          uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+          multiple: false,
+          cropping: false,
+          resourceType: "image",
+          clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
+          maxFileSize: 5 * 1024 * 1024, // 5MB
+          folder: "classroom-uploads",
+        },
+        (error, result) => {
+          if (error) return;
+          if (!result) return;
+          if (result.event === "success") {
+            const info = result.info;
+            const newVal: UploadWidgetValue = {
+              url: info.secure_url,
+              publicId: info.public_id,
+            };
+            setPreview(newVal);
+            setDeleteToken(info.delete_token ?? null);
+            onChangeRef.current?.(newVal);
+          }
+        },
+      );
+    };
+
+    // Load Cloudinary script if not already present
+    if (!window.cloudinary) {
+      const script = document.createElement("script");
+      script.src = "https://upload-widget.cloudinary.com/latest/global/all.js";
+      script.type = "text/javascript";
+      script.onload = initializeWidget;
+      script.onerror = () => console.error("Failed to load Cloudinary widget");
+      document.body.appendChild(script);
+    } else {
+      initializeWidget();
+    }
   }, []);
 
   const removeFromCloudinary = async () => {
