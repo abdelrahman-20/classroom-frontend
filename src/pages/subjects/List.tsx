@@ -26,10 +26,34 @@ import { Button } from "@/components/ui/button";
 import { ShowButton } from "@/components/refine-ui/buttons/show";
 import { EditButton } from "@/components/refine-ui/buttons/edit";
 import { DeleteButton } from "@/components/refine-ui/buttons/delete";
+import { CrudFilter, CrudFilters } from "@refinedev/core";
 
 const SubjectsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
+
+  const departmentOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of Mock_SUBJECTS) {
+      if (s.department) set.add(s.department);
+    }
+    return ["all", ...Array.from(set)];
+  }, []);
+
+  const departmentFiltering: CrudFilters =
+    selectedDepartment && selectedDepartment !== "all"
+      ? [
+          {
+            field: "department",
+            operator: "eq" as const,
+            value: selectedDepartment,
+          },
+        ]
+      : [];
+
+  const searchFiltering: CrudFilters = searchQuery
+    ? [{ field: "name", operator: "contains" as const, value: searchQuery }]
+    : [];
 
   const columns = useMemo<ColumnDef<Subject>[]>(
     () => [
@@ -47,7 +71,7 @@ const SubjectsList = () => {
         cell: ({ getValue }) => <span>{getValue<string>()}</span>,
       },
       {
-        accessorKey: "department",
+        accessorKey: "department.name",
         size: 100,
         header: () => <p className="column-title">Department</p>,
         cell: ({ getValue }) => (
@@ -100,8 +124,10 @@ const SubjectsList = () => {
     refineCoreProps: {
       resource: "subjects",
       pagination: { mode: "client" },
-      filters: {},
       sorters: {},
+      filters: {
+        permanent: [...departmentFiltering, ...searchFiltering],
+      },
     },
   });
 
@@ -114,11 +140,11 @@ const SubjectsList = () => {
       <div className="flex flex-col gap-5 space-y-4">
         <p>Quick Access to essential metrics and management tools.</p>
 
+        {/* SEARCH, Filtering, & Create-Button */}
         <div className="flex flex-col gap-2">
           {/* Search-Field */}
           <div className="search-field">
             <Search className="search-icon" />
-
             <Input
               type="text"
               placeholder="Search By Name"
@@ -132,24 +158,24 @@ const SubjectsList = () => {
           <div className="flex gap-2">
             {/* Filter-Field */}
             <div className="flex ">
-              <Select>
+              <Select
+                value={selectedDepartment}
+                onValueChange={(val) => setSelectedDepartment(val)}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Department"></SelectValue>
+                  <SelectValue placeholder="Select Department" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem key="all" value="all">
-                    All Departments
-                  </SelectItem>
-
-                  {Mock_SUBJECTS.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.department}>
-                      {subject.department}
+                  {departmentOptions.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept === "all" ? "All Departments" : dept}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <CreateButton />
           </div>
         </div>
