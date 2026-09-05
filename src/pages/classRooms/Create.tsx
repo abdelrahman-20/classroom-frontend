@@ -14,7 +14,7 @@ import {
 import { classSchema } from "@/lib/schema";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { useBack } from "@refinedev/core";
+import { useBack, useList } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import {
   Form,
@@ -32,8 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { subjects, teachers } from "./mock-data";
 import UploadWidget from "@/components/UploadWidget";
+import { Subject, User } from "@/types";
+// import { subjects, teachers } from "./mock-data";
 
 function ClassCreate() {
   const back = useBack();
@@ -46,6 +47,7 @@ function ClassCreate() {
     },
   });
   const {
+    refineCore: { onFinish },
     handleSubmit,
     formState: { isSubmitting, errors },
     control,
@@ -67,6 +69,9 @@ function ClassCreate() {
           "--border-radius": "calc(var(--radius)  + 4px)",
         } as React.CSSProperties,
       });
+
+      onFinish(data);
+
       console.log(data);
     } catch (error) {
       console.error(error);
@@ -89,6 +94,27 @@ function ClassCreate() {
       });
     }
   };
+
+  const { query: subjectsQuery } = useList<Subject>({
+    resource: "subjects",
+    pagination: {
+      pageSize: 100,
+    },
+  });
+
+  const { query: teachersQuery } = useList<User>({
+    resource: "users",
+    filters: [{ field: "role", operator: "eq", value: "teacher" }],
+    pagination: {
+      pageSize: 100,
+    },
+  });
+
+  const subjects = subjectsQuery.data?.data ?? [];
+  const subjectsLoading = subjectsQuery.isLoading;
+
+  const teachers = teachersQuery.data?.data ?? [];
+  const teachersLoading = teachersQuery.isLoading;
 
   return (
     <CreateView>
@@ -176,10 +202,12 @@ function ClassCreate() {
 
                 {/* Subjects And Teachers */}
                 <div className="grid md:grid-cols-2 gap-4">
+                  {/* Subjects-Field */}
                   <Controller
                     name="subjectId"
                     control={control}
                     defaultValue={undefined}
+                    disabled={subjectsLoading}
                     render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>
@@ -225,10 +253,12 @@ function ClassCreate() {
                     )}
                   />
 
+                  {/* Teachers-Field */}
                   <Controller
                     name="teacherId"
                     control={control}
                     defaultValue={undefined}
+                    disabled={teachersLoading}
                     render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>

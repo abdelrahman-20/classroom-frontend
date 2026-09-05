@@ -41,7 +41,7 @@
 // };
 
 import { BASE_URL } from "@/constants";
-import { ListResponse } from "@/types";
+import { CreateResponse, ListResponse } from "@/types";
 import { HttpError } from "@refinedev/core";
 import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
 
@@ -103,6 +103,18 @@ const options: CreateDataProviderOptions = {
       }
 
       return query;
+    },
+  },
+
+  create: {
+    getEndpoint: ({ resource }) => resource,
+
+    buildBodyParams: async ({ variables }) => variables,
+
+    mapResponse: async (response) => {
+      const data: CreateResponse = await response.json();
+
+      return data.data ?? [];
     },
   },
 };
