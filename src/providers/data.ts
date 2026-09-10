@@ -130,7 +130,7 @@ const options: CreateDataProviderOptions = {
     mapResponse: async (response, params) => {
       const data: GetOneResponse = await response.json();
 
-      return data.data ?? [];
+      return data.data ?? {};
     },
   },
 };
