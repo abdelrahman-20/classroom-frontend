@@ -25,6 +25,35 @@ export type Subject = {
   createdAt: string;
 };
 
+export type Schedule = {
+  day: string;
+  startTime: string;
+  endTime: string;
+};
+
+export type Department = {
+  id: number;
+  name: string;
+  description: string;
+};
+
+export type ClassDetails = {
+  id: number;
+  name: string;
+  description: string;
+  status: "active" | "inactive";
+  capacity: number;
+  courseCode: string;
+  courseName: string;
+  bannerUrl?: string;
+  bannerCldPubId?: string;
+  subject?: Subject;
+  teacher?: User;
+  department?: Department;
+  schedules: Schedule[];
+  inviteCode?: string;
+};
+
 export type ListResponse<T = unknown> = {
   data?: T[];
   pagination?: {

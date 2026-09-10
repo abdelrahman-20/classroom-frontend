@@ -42,7 +42,7 @@
 
 import { BASE_URL } from "@/constants";
 import { CreateResponse, ListResponse } from "@/types";
-import { HttpError } from "@refinedev/core";
+import { GetOneResponse, HttpError } from "@refinedev/core";
 import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
 
 const buildHttpError = async (response: Response): Promise<HttpError> => {
@@ -97,6 +97,12 @@ const options: CreateDataProviderOptions = {
         if (field === "department") {
           query.department = filter.value;
         }
+        if (field === "subject") {
+          query.subject = filter.value;
+        }
+        if (field === "teacher") {
+          query.teacher = filter.value;
+        }
         if (filter.operator === "contains") {
           query.search = filter.value;
         }
@@ -113,6 +119,16 @@ const options: CreateDataProviderOptions = {
 
     mapResponse: async (response) => {
       const data: CreateResponse = await response.json();
+
+      return data.data ?? [];
+    },
+  },
+
+  getOne: {
+    getEndpoint: ({ resource, id }) => `${resource}/${id}`,
+
+    mapResponse: async (response, params) => {
+      const data: GetOneResponse = await response.json();
 
       return data.data ?? [];
     },
