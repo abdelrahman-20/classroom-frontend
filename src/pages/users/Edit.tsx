@@ -1,5 +1,5 @@
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { CreateView } from "@/components/refine-ui/views/create-view";
+import { EditView } from "@/components/refine-ui/views/edit-view";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,31 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { subjectSchema } from "@/lib/schema";
-import { Department } from "@/types";
+import { userSchema } from "@/lib/schema";
+import { User, UserRole } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack, useInfiniteList } from "@refinedev/core";
+import { useBack } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { useEffect } from "react";
 
-const SubjectCreate = () => {
+const UserEdit = () => {
   const back = useBack();
-  const { query, result } = useInfiniteList<Department>({
-    resource: "departments",
-    pagination: { pageSize: 100, mode: "server" },
-  });
-  const departments = result.data?.pages.flatMap((page) => page.data) ?? [];
-
-  useEffect(() => {
-    if (result.hasNextPage && !query.isFetchingNextPage) {
-      void query.fetchNextPage();
-    }
-  }, [query, result.hasNextPage]);
-
-  const form = useForm({
-    resolver: zodResolver(subjectSchema),
-    refineCoreProps: { resource: "subjects", action: "create" },
+  const form = useForm<User>({
+    resolver: zodResolver(userSchema),
+    refineCoreProps: { resource: "users", action: "edit" },
   });
 
   const {
@@ -51,9 +37,9 @@ const SubjectCreate = () => {
   } = form;
 
   return (
-    <CreateView>
+    <EditView>
       <Breadcrumb />
-      <h1 className="page-title">Create Subject</h1>
+      <h1 className="page-title">Edit User</h1>
       <Form {...form}>
         <form onSubmit={handleSubmit(onFinish)} className="space-y-4 max-w-lg">
           <FormField
@@ -71,12 +57,12 @@ const SubjectCreate = () => {
           />
           <FormField
             control={control}
-            name="code"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Code</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -84,47 +70,29 @@ const SubjectCreate = () => {
           />
           <FormField
             control={control}
-            name="departmentId"
+            name="role"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Department</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ? String(field.value) : undefined}
-                >
+                <FormLabel>Role</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={String(d.id)}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                    <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+                    <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="flex gap-2">
             <Button type="submit" disabled={formLoading}>
-              Create
+              Save
             </Button>
             <Button type="button" variant="outline" onClick={() => back()}>
               Cancel
@@ -132,8 +100,8 @@ const SubjectCreate = () => {
           </div>
         </form>
       </Form>
-    </CreateView>
+    </EditView>
   );
 };
 
-export default SubjectCreate;
+export default UserEdit;

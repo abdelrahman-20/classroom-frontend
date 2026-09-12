@@ -17,31 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { subjectSchema } from "@/lib/schema";
-import { Department } from "@/types";
+import { userSchema } from "@/lib/schema";
+import { UserRole } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack, useInfiniteList } from "@refinedev/core";
+import { useBack } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { useEffect } from "react";
 
-const SubjectCreate = () => {
+const UserCreate = () => {
   const back = useBack();
-  const { query, result } = useInfiniteList<Department>({
-    resource: "departments",
-    pagination: { pageSize: 100, mode: "server" },
-  });
-  const departments = result.data?.pages.flatMap((page) => page.data) ?? [];
-
-  useEffect(() => {
-    if (result.hasNextPage && !query.isFetchingNextPage) {
-      void query.fetchNextPage();
-    }
-  }, [query, result.hasNextPage]);
-
   const form = useForm({
-    resolver: zodResolver(subjectSchema),
-    refineCoreProps: { resource: "subjects", action: "create" },
+    resolver: zodResolver(userSchema),
+    refineCoreProps: { resource: "users", action: "create" },
   });
 
   const {
@@ -53,7 +39,7 @@ const SubjectCreate = () => {
   return (
     <CreateView>
       <Breadcrumb />
-      <h1 className="page-title">Create Subject</h1>
+      <h1 className="page-title">Create User</h1>
       <Form {...form}>
         <form onSubmit={handleSubmit(onFinish)} className="space-y-4 max-w-lg">
           <FormField
@@ -71,12 +57,12 @@ const SubjectCreate = () => {
           />
           <FormField
             control={control}
-            name="code"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Code</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -84,40 +70,25 @@ const SubjectCreate = () => {
           />
           <FormField
             control={control}
-            name="departmentId"
+            name="role"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Department</FormLabel>
+                <FormLabel>Role</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value ? String(field.value) : undefined}
+                  defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={String(d.id)}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                    <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+                    <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea {...field} />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -136,4 +107,4 @@ const SubjectCreate = () => {
   );
 };
 
-export default SubjectCreate;
+export default UserCreate;

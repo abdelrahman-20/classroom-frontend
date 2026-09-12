@@ -13,16 +13,28 @@ export type User = {
   role: UserRole;
   image?: string;
   imageCldPubId?: string;
-  department?: string;
+};
+
+export type Department = {
+  id: number;
+  name: string;
+  code: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  subjectCount?: number;
+  teacherCount?: number;
 };
 
 export type Subject = {
-  id: string;
+  id: number;
   code: string;
   name: string;
-  description: string;
-  department: string;
+  description?: string;
+  departmentId: number;
+  department?: Department;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type Schedule = {
@@ -31,27 +43,75 @@ export type Schedule = {
   endTime: string;
 };
 
-export type Department = {
-  id: number;
-  name: string;
-  description: string;
-};
+export type CapacityStatus = "ok" | "warning" | "full";
 
 export type ClassDetails = {
   id: number;
   name: string;
-  description: string;
-  status: "active" | "inactive";
+  description?: string;
+  status: "active" | "inactive" | "archived";
   capacity: number;
-  courseCode: string;
-  courseName: string;
+  enrollmentCount?: number;
+  capacityStatus?: CapacityStatus;
+  subjectId: number;
+  teacherId: string;
   bannerUrl?: string;
   bannerCldPubId?: string;
+  inviteCode?: string;
   subject?: Subject;
   teacher?: User;
   department?: Department;
   schedules: Schedule[];
-  inviteCode?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Enrollment = {
+  id: number;
+  studentId: string;
+  classId: number;
+  createdAt: string;
+  student?: User;
+  class?: ClassDetails;
+  subjectName?: string;
+  teacherName?: string;
+};
+
+export type ActivityLog = {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  actorName?: string;
+};
+
+export type DashboardStats = {
+  overview: {
+    users: number;
+    classes: number;
+    enrollments: number;
+    departments: number;
+  };
+  enrollmentTrends: { date: string; count: number }[];
+  classesByDepartment: { department: string; count: number }[];
+  capacityStatus: { ok: number; warning: number; full: number };
+  userDistribution: { role: string; count: number }[];
+  activityFeed: ActivityLog[];
+  metrics: {
+    avgClassSize: number;
+    fillRate: number;
+    activeClasses: number;
+  };
+};
+
+export type SearchResult = {
+  type: string;
+  id: string | number;
+  title: string;
+  subtitle?: string;
+  url: string;
 };
 
 export type ListResponse<T = unknown> = {

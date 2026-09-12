@@ -1,5 +1,5 @@
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { CreateView } from "@/components/refine-ui/views/create-view";
+import { EditView } from "@/components/refine-ui/views/edit-view";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,13 +19,16 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { subjectSchema } from "@/lib/schema";
-import { Department } from "@/types";
+import { Department, Subject } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack, useInfiniteList } from "@refinedev/core";
+import { HttpError, useBack, useInfiniteList } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { useEffect } from "react";
+import { z } from "zod";
 
-const SubjectCreate = () => {
+type SubjectFormValues = z.infer<typeof subjectSchema>;
+
+const SubjectEdit = () => {
   const back = useBack();
   const { query, result } = useInfiniteList<Department>({
     resource: "departments",
@@ -39,9 +42,9 @@ const SubjectCreate = () => {
     }
   }, [query, result.hasNextPage]);
 
-  const form = useForm({
+  const form = useForm<Subject, HttpError, SubjectFormValues>({
     resolver: zodResolver(subjectSchema),
-    refineCoreProps: { resource: "subjects", action: "create" },
+    refineCoreProps: { resource: "subjects", action: "edit" },
   });
 
   const {
@@ -51,9 +54,9 @@ const SubjectCreate = () => {
   } = form;
 
   return (
-    <CreateView>
+    <EditView>
       <Breadcrumb />
-      <h1 className="page-title">Create Subject</h1>
+      <h1 className="page-title">Edit Subject</h1>
       <Form {...form}>
         <form onSubmit={handleSubmit(onFinish)} className="space-y-4 max-w-lg">
           <FormField
@@ -89,12 +92,12 @@ const SubjectCreate = () => {
               <FormItem>
                 <FormLabel>Department</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ? String(field.value) : undefined}
+                  onValueChange={(v) => field.onChange(Number(v))}
+                  value={String(field.value ?? "")}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -116,7 +119,7 @@ const SubjectCreate = () => {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +127,7 @@ const SubjectCreate = () => {
           />
           <div className="flex gap-2">
             <Button type="submit" disabled={formLoading}>
-              Create
+              Save
             </Button>
             <Button type="button" variant="outline" onClick={() => back()}>
               Cancel
@@ -132,8 +135,8 @@ const SubjectCreate = () => {
           </div>
         </form>
       </Form>
-    </CreateView>
+    </EditView>
   );
 };
 
-export default SubjectCreate;
+export default SubjectEdit;

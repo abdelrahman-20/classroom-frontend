@@ -1,66 +1,32 @@
-// import { createSimpleRestDataProvider } from "@refinedev/rest/simple-rest";
-// import { API_URL } from "./constants";
-// export const { dataProvider, kyInstance } = createSimpleRestDataProvider({
-//   apiURL: API_URL,
-// });
-
-// const API_URL = "https://api.fake-rest.refine.dev";
-
-// import { Mock_SUBJECTS } from "@/pages/subjects/mock-data";
-// import type {
-//   BaseRecord,
-//   DataProvider,
-//   GetListParams,
-//   GetListResponse,
-// } from "@refinedev/core";
-
-// const notImplemented = (action: string) => () => {
-//   throw new Error(`${action} is not implemented for subjects.`);
-// };
-
-// export const dataProvider: DataProvider = {
-//   getOne: notImplemented("getOne"),
-//   update: notImplemented("update"),
-//   getList: async <
-//     TData extends BaseRecord = BaseRecord,
-//   >({}: GetListParams): Promise<GetListResponse<TData>> => {
-//     return {
-//       data: Mock_SUBJECTS as unknown as TData[],
-//       total: Mock_SUBJECTS.length,
-//     };
-//   },
-//   create: notImplemented("create"),
-//   deleteOne: notImplemented("deleteOne"),
-//   getApiUrl: () => "",
-//   // Optional methods:
-//   // getMany: () => { /* ... */ },
-//   // createMany: () => { /* ... */ },
-//   // deleteMany: () => { /* ... */ },
-//   // updateMany: () => { /* ... */ },
-//   // custom: () => { /* ... */ },
-// };
-
 import { BASE_URL } from "@/constants";
 import { CreateResponse, ListResponse } from "@/types";
-import { GetOneResponse, HttpError } from "@refinedev/core";
+import {
+  CreateParams,
+  CustomParams,
+  DeleteOneParams,
+  GetOneResponse,
+  HttpError,
+  UpdateParams,
+} from "@refinedev/core";
 import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
+
+const fetchWithCredentials = (url: string, init?: RequestInit) =>
+  fetch(url, { ...init, credentials: "include" });
 
 const buildHttpError = async (response: Response): Promise<HttpError> => {
   let message = "Request Failed";
 
   try {
-    const payload = (await response.json()) as { message?: string };
-    if (payload.message) {
-      message = payload.message;
-    }
-  } catch (error) {}
+    const payload = (await response.json()) as {
+      error?: string;
+      message?: string;
+    };
+    message = payload.error ?? payload.message ?? message;
+  } catch {
+    // ignore
+  }
 
-  return {
-    message,
-    statusCode: response.status,
-    // name: "HttpError",
-    // statusText: response.statusText,
-  };
+  return { message, statusCode: response.status };
 };
 
 const options: CreateDataProviderOptions = {
@@ -69,43 +35,49 @@ const options: CreateDataProviderOptions = {
 
     mapResponse: async (response) => {
       if (!response.ok) throw await buildHttpError(response);
-
       const payload: ListResponse = await response.clone().json();
       return payload.data ?? [];
     },
 
     getTotalCount: async (response) => {
       if (!response.ok) throw await buildHttpError(response);
-
       const payload: ListResponse = await response.clone().json();
       return payload.pagination?.total ?? payload.data?.length ?? 0;
     },
 
-    buildQueryParams: async ({ pagination, filters }) => {
+    buildQueryParams: async ({ pagination, filters, sorters }) => {
       const page = pagination?.currentPage ?? 1;
       const limit = pagination?.pageSize ?? 10;
 
-      // The Query Consumed in Backend
-      const query: Record<string, string | number> = {
-        page,
-        limit,
-      };
+      const query: Record<string, string | number> = { page, limit };
 
-      // console.log(filters);
       for (const filter of filters ?? []) {
         const field = "field" in filter ? filter.field : "";
-        if (field === "department") {
-          query.department = filter.value;
+        if (field === "department") query.department = filter.value;
+        if (field === "subject") query.subject = filter.value;
+        if (field === "teacher") query.teacher = filter.value;
+        if (field === "role") query.role = filter.value;
+        if (field === "status") query.status = filter.value;
+        if (filter.operator === "contains") query.search = filter.value;
+        if (
+          filter.operator === "or" &&
+          filter.value.some(
+            (nestedFilter) => nestedFilter.operator === "contains",
+          )
+        ) {
+          const nestedFilter = filter.value.find(
+            (nestedFilter) => nestedFilter.operator === "contains",
+          );
+
+          if (nestedFilter) {
+            query.search = nestedFilter.value;
+          }
         }
-        if (field === "subject") {
-          query.subject = filter.value;
-        }
-        if (field === "teacher") {
-          query.teacher = filter.value;
-        }
-        if (filter.operator === "contains") {
-          query.search = filter.value;
-        }
+      }
+
+      if (sorters?.[0]) {
+        query.sort = sorters[0].field;
+        query.order = sorters[0].order;
       }
 
       return query;
@@ -114,27 +86,139 @@ const options: CreateDataProviderOptions = {
 
   create: {
     getEndpoint: ({ resource }) => resource,
-
     buildBodyParams: async ({ variables }) => variables,
-
     mapResponse: async (response) => {
+      if (!response.ok) throw await buildHttpError(response);
       const data: CreateResponse = await response.json();
-
-      return data.data ?? [];
+      return data.data ?? {};
     },
   },
 
   getOne: {
     getEndpoint: ({ resource, id }) => `${resource}/${id}`,
+    mapResponse: async (response) => {
+      if (!response.ok) throw await buildHttpError(response);
+      const data: GetOneResponse = await response.json();
+      return data.data ?? {};
+    },
+  },
+
+  update: {
+    getEndpoint: ({ resource, id }) => `${resource}/${id}`,
+    buildBodyParams: async ({ variables }) => variables,
+    mapResponse: async (response) => {
+      if (!response.ok) throw await buildHttpError(response);
+      const data = (await response.json()) as { data?: unknown };
+      return data.data ?? {};
+    },
+  },
+
+  deleteOne: {
+    getEndpoint: ({ resource, id }) => `${resource}/${id}`,
 
     mapResponse: async (response, params) => {
-      const data: GetOneResponse = await response.json();
+      if (!response.ok) throw await buildHttpError(response);
+      if (response.status === 204) return { id: params.id };
+      const data = (await response.json()) as { data?: unknown };
+      return data.data ?? {};
+    },
+  },
 
-      return data.data ?? [];
+  custom: {
+    buildQueryParams: async ({ query }) => query ?? {},
+    mapResponse: async (response) => {
+      if (!response.ok) throw await buildHttpError(response);
+      if (response.status === 204) return {};
+      return response.json();
     },
   },
 };
 
-const { dataProvider } = createDataProvider(BASE_URL, options);
+const { dataProvider: baseProvider } = createDataProvider(BASE_URL, options);
+
+const dataProvider = {
+  ...baseProvider,
+  getList: async (params: Parameters<typeof baseProvider.getList>[0]) => {
+    const url = `${BASE_URL}/${params.resource}?${new URLSearchParams(
+      Object.entries(
+        (await options.getList!.buildQueryParams!(params)) as Record<
+          string,
+          string
+        >,
+      ),
+    ).toString()}`;
+    const response = await fetchWithCredentials(url);
+    const data = await options.getList!.mapResponse!(response, params);
+    const total = await options.getList!.getTotalCount!(response, params);
+    return { data, total };
+  },
+  getOne: async (params: Parameters<typeof baseProvider.getOne>[0]) => {
+    const response = await fetchWithCredentials(
+      `${BASE_URL}/${params.resource}/${params.id}`,
+    );
+    const data = await options.getOne!.mapResponse!(response, params);
+    return { data };
+  },
+  create: async (params: CreateParams) => {
+    const response = await fetchWithCredentials(
+      `${BASE_URL}/${params.resource}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params.variables),
+      },
+    );
+    const data = await options.create!.mapResponse!(response, params);
+    return { data };
+  },
+  update: async (params: UpdateParams) => {
+    const response = await fetchWithCredentials(
+      `${BASE_URL}/${params.resource}/${params.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params.variables),
+      },
+    );
+
+    const data = await options.update!.mapResponse!(response, params);
+    return { data };
+  },
+  deleteOne: async (params: DeleteOneParams) => {
+    const response = await fetchWithCredentials(
+      `${BASE_URL}/${params.resource}/${params.id}`,
+      { method: "DELETE" },
+    );
+
+    const data = await options.deleteOne!.mapResponse!(response, params);
+    return { data };
+  },
+  custom: async (params: CustomParams) => {
+    const query = params.query
+      ? `?${new URLSearchParams(
+          params.query as Record<string, string>,
+        ).toString()}`
+      : "";
+    const response = await fetchWithCredentials(
+      `${BASE_URL}/${params.url}${query}`,
+      {
+        method: params.method ?? "GET",
+        headers: {
+          ...params.headers,
+          ...(params.method && params.method !== "get"
+            ? { "Content-Type": "application/json" }
+            : {}),
+        },
+        body:
+          params.method && params.method !== "get"
+            ? JSON.stringify(params.payload)
+            : undefined,
+      },
+    );
+    const data = await options.custom!.mapResponse!(response, params);
+    return { data };
+  },
+  getApiUrl: () => BASE_URL,
+};
 
 export default dataProvider;
