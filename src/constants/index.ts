@@ -11,7 +11,7 @@ export function requireEnv(key: string, fallbackValue?: string): string {
   return String(val);
 }
 
-export const BASE_URL = requireEnv("VITE_BACKEND_URL");
+export const BASE_URL = requireEnv("VITE_BACKEND_URL").replace(/\/+$/, "");
 export const CLOUDINARY_URL = requireEnv("VITE_CLOUDINARY_URL", "");
 export const CLOUDINARY_CLOUD_NAME = requireEnv("VITE_CLOUDINARY_CLOUD_NAME");
 export const CLOUDINARY_UPLOAD_PRESET = requireEnv(

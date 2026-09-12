@@ -3,22 +3,17 @@ import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { subjectSchema } from "@/lib/schema";
-import { Department } from "@/types";
+import { departmentSchema } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack, useList } from "@refinedev/core";
+import { useBack } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 
-const SubjectCreate = () => {
+const DepartmentCreate = () => {
   const back = useBack();
-  const { query } = useList<Department>({ resource: "departments", pagination: { pageSize: 100 } });
-  const departments = query.data?.data ?? [];
-
   const form = useForm({
-    resolver: zodResolver(subjectSchema),
-    refineCoreProps: { resource: "subjects", action: "create" },
+    resolver: zodResolver(departmentSchema),
+    refineCoreProps: { resource: "departments", action: "create" },
   });
 
   const { refineCore: { onFinish, formLoading }, handleSubmit, control } = form;
@@ -26,7 +21,7 @@ const SubjectCreate = () => {
   return (
     <CreateView>
       <Breadcrumb />
-      <h1 className="page-title">Create Subject</h1>
+      <h1 className="page-title">Create Department</h1>
       <Form {...form}>
         <form onSubmit={handleSubmit(onFinish)} className="space-y-4 max-w-lg">
           <FormField control={control} name="name" render={({ field }) => (
@@ -34,20 +29,6 @@ const SubjectCreate = () => {
           )} />
           <FormField control={control} name="code" render={({ field }) => (
             <FormItem><FormLabel>Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-          <FormField control={control} name="departmentId" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Department</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value ? String(field.value) : undefined}>
-                <FormControl><SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {departments.map((d) => (
-                    <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
           )} />
           <FormField control={control} name="description" render={({ field }) => (
             <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
@@ -62,4 +43,4 @@ const SubjectCreate = () => {
   );
 };
 
-export default SubjectCreate;
+export default DepartmentCreate;

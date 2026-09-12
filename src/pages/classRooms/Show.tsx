@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ClassDetails } from "@/types";
-import { useShow } from "@refinedev/core";
+import { useCreate, useNotification, useShow } from "@refinedev/core";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { AdvancedImage } from "@cloudinary/react";
 import { bannerImage } from "@/lib/cloudinary";
@@ -16,6 +16,8 @@ const ShowClassDetails = () => {
   const { query } = useShow<ClassDetails>({
     resource: "classes",
   });
+  const { open } = useNotification();
+  const { mutate: joinClass, mutation } = useCreate();
 
   const classDetails = query.data?.data;
   const { isLoading, isError } = query;
@@ -33,6 +35,33 @@ const ShowClassDetails = () => {
   const placeholderUrl = `https://placehold.co/600x400?text=${encodeURIComponent(
     teacherInitials || "NA",
   )}`;
+
+  const handleJoinClass = () => {
+    if (!classDetails) return;
+
+    joinClass(
+      {
+        resource: `classes/${classDetails.id}/enrollments`,
+        values: {},
+      },
+      {
+        onSuccess: () => {
+          open?.({
+            type: "success",
+            message: "Class joined",
+            description: `You are now enrolled in ${classDetails.name}.`,
+          });
+        },
+        onError: (error) => {
+          open?.({
+            type: "error",
+            message: "Unable to join class",
+            description: error.message,
+          });
+        },
+      },
+    );
+  };
 
   if (isLoading || isError || !classDetails) {
     return (
@@ -150,8 +179,13 @@ const ShowClassDetails = () => {
           </ol>
         </div>
 
-        <Button size="lg" className="w-full">
-          Join Class
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={handleJoinClass}
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? "Joining..." : "Join Class"}
         </Button>
       </Card>
 

@@ -14,63 +14,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Department, Subject } from "@/types";
-import { CrudFilters, useList } from "@refinedev/core";
+import { User, UserRole } from "@/types";
+import { CrudFilters } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-const SubjectsList = () => {
+const UsersList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [selectedRole, setSelectedRole] = useState("all");
 
-  const { query: deptQuery } = useList<Department>({
-    resource: "departments",
-    pagination: { pageSize: 100 },
-  });
-  const departments = deptQuery.data?.data ?? [];
-
-  const departmentFilter: CrudFilters =
-    selectedDepartment !== "all"
-      ? [{ field: "department", operator: "eq", value: selectedDepartment }]
+  const roleFilter: CrudFilters =
+    selectedRole !== "all"
+      ? [{ field: "role", operator: "eq", value: selectedRole }]
       : [];
 
   const searchFilters: CrudFilters = searchQuery
     ? [{ field: "name", operator: "contains", value: searchQuery }]
     : [];
 
-  const columns = useMemo<ColumnDef<Subject>[]>(
+  const columns = useMemo<ColumnDef<User>[]>(
     () => [
-      {
-        accessorKey: "code",
-        size: 50,
-        header: () => <p className="column-title">Code</p>,
-        cell: ({ getValue }) => (
-          <Badge variant="secondary">{getValue<string>()}</Badge>
-        ),
-      },
       {
         accessorKey: "name",
         size: 100,
-        header: () => <p className="column-title">Subject</p>,
-      },
-      {
-        accessorKey: "department.name",
-        size: 100,
-        header: () => <p className="column-title">Department</p>,
-        cell: ({ row }) => (
-          <Badge variant="outline">
-            {row.original.department?.name ?? "—"}
-          </Badge>
+        header: () => <p className="column-title">Name</p>,
+        cell: ({ getValue }) => (
+          <span className="font-medium">{getValue<string>()}</span>
         ),
       },
       {
-        accessorKey: "createdAt",
+        accessorKey: "email",
+        size: 120,
+        header: () => <p className="column-title">Email</p>,
+      },
+      {
+        accessorKey: "role",
         size: 50,
-        header: () => <p className="column-title">Created</p>,
-        cell: ({ getValue }) =>
-          new Date(getValue<string>()).toLocaleDateString(),
+        header: () => <p className="column-title">Role</p>,
+        cell: ({ getValue }) => (
+          <Badge variant="outline">{getValue<string>()}</Badge>
+        ),
       },
       {
         id: "actions",
@@ -79,17 +64,17 @@ const SubjectsList = () => {
         cell: ({ row }) => (
           <div className="flex gap-1">
             <ShowButton
-              resource="subjects"
+              resource="users"
               recordItemId={row.original.id}
               size="sm"
             />
             <EditButton
-              resource="subjects"
+              resource="users"
               recordItemId={row.original.id}
               size="sm"
             />
             <DeleteButton
-              resource="subjects"
+              resource="users"
               recordItemId={row.original.id}
               size="sm"
             />
@@ -100,12 +85,13 @@ const SubjectsList = () => {
     [],
   );
 
-  const table = useTable<Subject>({
+  const table = useTable<User>({
     columns,
     refineCoreProps: {
-      resource: "subjects",
+      resource: "users",
       pagination: { pageSize: 10, mode: "server" },
-      filters: { permanent: [...departmentFilter, ...searchFilters] },
+      filters: { permanent: [...roleFilter, ...searchFilters] },
+      sorters: { initial: [{ field: "createdAt", order: "desc" }] },
       syncWithLocation: true,
     },
   });
@@ -113,35 +99,30 @@ const SubjectsList = () => {
   return (
     <ListView>
       <Breadcrumb />
-      <h1 className="page-title">Subjects</h1>
+      <h1 className="page-title">Users</h1>
       <div className="flex flex-col gap-2 mb-4">
         <div className="search-field">
           <Search className="search-icon" />
           <Input
-            placeholder="Search by name or code..."
+            placeholder="Search by name or email..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <div className="flex gap-2">
-          <Select
-            value={selectedDepartment}
-            onValueChange={setSelectedDepartment}
-          >
-            <SelectTrigger className="w-45">
-              <SelectValue placeholder="Department" />
+          <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.id} value={d.name}>
-                  {d.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+              <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+              <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
             </SelectContent>
           </Select>
-          <CreateButton resource="subjects" />
+          <CreateButton resource="users" />
         </div>
       </div>
       <DataTable table={table} />
@@ -149,4 +130,4 @@ const SubjectsList = () => {
   );
 };
 
-export default SubjectsList;
+export default UsersList;
