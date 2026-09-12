@@ -22,9 +22,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { classSchema } from "@/lib/schema";
 import { ClassDetails, Subject, User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack, useList } from "@refinedev/core";
+import { HttpError, useBack, useList } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
+import { z } from "zod";
+
+type ClassFormValues = z.infer<typeof classSchema>;
 
 const ClassEdit = () => {
   const back = useBack();
@@ -38,7 +41,7 @@ const ClassEdit = () => {
     pagination: { pageSize: 100 },
   });
 
-  const form = useForm<ClassDetails>({
+  const form = useForm<ClassDetails, HttpError, ClassFormValues>({
     resolver: zodResolver(classSchema),
     refineCoreProps: { resource: "classes", action: "edit" },
   });

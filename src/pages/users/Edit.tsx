@@ -20,12 +20,15 @@ import {
 import { userSchema } from "@/lib/schema";
 import { User, UserRole } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBack } from "@refinedev/core";
+import { HttpError, useBack } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
+import { z } from "zod";
+
+type UserFormValues = z.infer<typeof userSchema>;
 
 const UserEdit = () => {
   const back = useBack();
-  const form = useForm<User>({
+  const form = useForm<User, HttpError, UserFormValues>({
     resolver: zodResolver(userSchema),
     refineCoreProps: { resource: "users", action: "edit" },
   });
