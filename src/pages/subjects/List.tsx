@@ -15,21 +15,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Department, Subject } from "@/types";
-import { CrudFilters, useList } from "@refinedev/core";
+import { CrudFilters, useInfiniteList } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const SubjectsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
 
-  const { query: deptQuery } = useList<Department>({
+  const { query: deptQuery, result: deptResult } = useInfiniteList<Department>({
     resource: "departments",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 100, mode: "server" },
   });
-  const departments = deptQuery.data?.data ?? [];
+  const departments = deptResult.data?.pages.flatMap((page) => page.data) ?? [];
+
+  useEffect(() => {
+    if (deptResult.hasNextPage && !deptQuery.isFetchingNextPage) {
+      void deptQuery.fetchNextPage();
+    }
+  }, [deptQuery, deptResult.hasNextPage]);
 
   const departmentFilter: CrudFilters =
     selectedDepartment !== "all"

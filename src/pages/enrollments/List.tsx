@@ -1,6 +1,7 @@
 import { ShowButton } from "@/components/refine-ui/buttons/show";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { ListView } from "@/components/refine-ui/views/list-view";
+import { DataTablePagination } from "@/components/refine-ui/data-table/data-table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -12,15 +13,20 @@ import {
 import { Enrollment } from "@/types";
 import { useList } from "@refinedev/core";
 import { BookMarked } from "lucide-react";
+import { useState } from "react";
 
 const EnrollmentsList = () => {
-  const { query } = useList<Enrollment>({
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const { query, result } = useList<Enrollment>({
     resource: "enrollments",
-    pagination: { pageSize: 12 },
+    pagination: { currentPage, pageSize, mode: "server" },
     sorters: [{ field: "createdAt", order: "desc" }],
   });
 
-  const enrollments = query.data?.data ?? [];
+  const enrollments = result.data;
+  const total = result.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   if (query.isLoading) {
     return <div className="p-6">Loading your classes...</div>;
@@ -108,6 +114,19 @@ const EnrollmentsList = () => {
             );
           })}
         </div>
+      )}
+      {enrollments.length > 0 && (
+        <DataTablePagination
+          currentPage={currentPage}
+          pageCount={pageCount}
+          setCurrentPage={setCurrentPage}
+          pageSize={pageSize}
+          setPageSize={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+          total={total}
+        />
       )}
     </ListView>
   );

@@ -59,6 +59,20 @@ const options: CreateDataProviderOptions = {
         if (field === "role") query.role = filter.value;
         if (field === "status") query.status = filter.value;
         if (filter.operator === "contains") query.search = filter.value;
+        if (
+          filter.operator === "or" &&
+          filter.value.some(
+            (nestedFilter) => nestedFilter.operator === "contains",
+          )
+        ) {
+          const nestedFilter = filter.value.find(
+            (nestedFilter) => nestedFilter.operator === "contains",
+          );
+
+          if (nestedFilter) {
+            query.search = nestedFilter.value;
+          }
+        }
       }
 
       if (sorters?.[0]) {
@@ -101,8 +115,10 @@ const options: CreateDataProviderOptions = {
 
   deleteOne: {
     getEndpoint: ({ resource, id }) => `${resource}/${id}`,
-    mapResponse: async (response) => {
+
+    mapResponse: async (response, params) => {
       if (!response.ok) throw await buildHttpError(response);
+      if (response.status === 204) return { id: params.id };
       const data = (await response.json()) as { data?: unknown };
       return data.data ?? {};
     },
@@ -112,6 +128,7 @@ const options: CreateDataProviderOptions = {
     buildQueryParams: async ({ query }) => query ?? {},
     mapResponse: async (response) => {
       if (!response.ok) throw await buildHttpError(response);
+      if (response.status === 204) return {};
       return response.json();
     },
   },
@@ -186,10 +203,12 @@ const dataProvider = {
       `${BASE_URL}/${params.url}${query}`,
       {
         method: params.method ?? "GET",
-        headers:
-          params.method && params.method !== "get"
+        headers: {
+          ...params.headers,
+          ...(params.method && params.method !== "get"
             ? { "Content-Type": "application/json" }
-            : undefined,
+            : {}),
+        },
         body:
           params.method && params.method !== "get"
             ? JSON.stringify(params.payload)

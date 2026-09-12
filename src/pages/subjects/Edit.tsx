@@ -21,19 +21,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { subjectSchema } from "@/lib/schema";
 import { Department, Subject } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HttpError, useBack, useList } from "@refinedev/core";
+import { HttpError, useBack, useInfiniteList } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
+import { useEffect } from "react";
 import { z } from "zod";
 
 type SubjectFormValues = z.infer<typeof subjectSchema>;
 
 const SubjectEdit = () => {
   const back = useBack();
-  const { query } = useList<Department>({
+  const { query, result } = useInfiniteList<Department>({
     resource: "departments",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 100, mode: "server" },
   });
-  const departments = query.data?.data ?? [];
+  const departments = result.data?.pages.flatMap((page) => page.data) ?? [];
+
+  useEffect(() => {
+    if (result.hasNextPage && !query.isFetchingNextPage) {
+      void query.fetchNextPage();
+    }
+  }, [query, result.hasNextPage]);
 
   const form = useForm<Subject, HttpError, SubjectFormValues>({
     resolver: zodResolver(subjectSchema),

@@ -31,7 +31,15 @@ const UsersList = () => {
       : [];
 
   const searchFilters: CrudFilters = searchQuery
-    ? [{ field: "name", operator: "contains", value: searchQuery }]
+    ? [
+        {
+          operator: "or",
+          value: [
+            { field: "name", operator: "contains", value: searchQuery },
+            { field: "email", operator: "contains", value: searchQuery },
+          ],
+        },
+      ]
     : [];
 
   const columns = useMemo<ColumnDef<User>[]>(

@@ -22,7 +22,6 @@ import { UserRole } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBack } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { z } from "zod";
 
 const UserCreate = () => {
   const back = useBack();
@@ -75,7 +74,10 @@ const UserCreate = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Role</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />

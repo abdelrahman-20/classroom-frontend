@@ -171,12 +171,6 @@ const ShowClassDetails = () => {
         {/* Join Class Section */}
         <div className="join">
           <h2>🎓 Join Class</h2>
-
-          <ol>
-            <li>Ask your teacher for the invite code.</li>
-            <li>Click on &quot;Join Class&quot; button.</li>
-            <li>Paste the code and click &quot;Join&quot;</li>
-          </ol>
         </div>
 
         <Button
@@ -188,15 +182,6 @@ const ShowClassDetails = () => {
           {mutation.isPending ? "Joining..." : "Join Class"}
         </Button>
       </Card>
-
-      {/* <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Enrolled Students</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable table={studentsTable} paginationVariant="simple" />
-        </CardContent>
-      </Card> */}
     </ShowView>
   );
 };

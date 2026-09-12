@@ -26,9 +26,14 @@ const DepartmentsList = () => {
       {
         accessorKey: "code",
         header: () => <p className="column-title">Code</p>,
-        cell: ({ getValue }) => <Badge variant="secondary">{getValue<string>()}</Badge>,
+        cell: ({ getValue }) => (
+          <Badge variant="secondary">{getValue<string>()}</Badge>
+        ),
       },
-      { accessorKey: "name", header: () => <p className="column-title">Name</p> },
+      {
+        accessorKey: "name",
+        header: () => <p className="column-title">Name</p>,
+      },
       {
         accessorKey: "subjectCount",
         header: () => <p className="column-title">Subjects</p>,
@@ -38,9 +43,21 @@ const DepartmentsList = () => {
         header: "Actions",
         cell: ({ row }) => (
           <div className="flex gap-1">
-            <ShowButton resource="departments" recordItemId={row.original.id} size="sm" />
-            <EditButton resource="departments" recordItemId={row.original.id} size="sm" />
-            <DeleteButton resource="departments" recordItemId={row.original.id} size="sm" />
+            <ShowButton
+              resource="departments"
+              recordItemId={row.original.id}
+              size="sm"
+            />
+            <EditButton
+              resource="departments"
+              recordItemId={row.original.id}
+              size="sm"
+            />
+            <DeleteButton
+              resource="departments"
+              recordItemId={row.original.id}
+              size="sm"
+            />
           </div>
         ),
       },
@@ -67,6 +84,7 @@ const DepartmentsList = () => {
           <Search className="search-icon" />
           <Input
             placeholder="Search departments..."
+            aria-label="Search departments"
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

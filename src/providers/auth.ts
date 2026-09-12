@@ -129,7 +129,12 @@ export const authProvider: AuthProvider = {
   },
 
   onError: async (error) => {
-    if (error?.statusCode === 401 || error?.statusCode === 403) {
+    const isSessionFailure =
+      error?.statusCode === 401 ||
+      (error?.statusCode === 403 &&
+        /authentication|session|unauthorized/i.test(error.message ?? ""));
+
+    if (isSessionFailure) {
       return { logout: true, redirectTo: "/login" };
     }
     return {};

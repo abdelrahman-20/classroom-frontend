@@ -114,9 +114,21 @@ function App() {
                 }
               >
                 <Route index element={<Dashboard />} />
+
                 <Route path="subjects">
                   <Route index element={<SubjectsList />} />
-                  <Route path="create" element={<SubjectCreate />} />
+                  <Route
+                    path="create"
+                    element={
+                      <CanAccess
+                        resource="subjects"
+                        action="create"
+                        fallback={<Navigate to="/subjects" replace />}
+                      >
+                        <SubjectCreate />
+                      </CanAccess>
+                    }
+                  />
                   <Route
                     path="edit/:id"
                     element={
@@ -130,12 +142,26 @@ function App() {
                     }
                   />
                 </Route>
+
                 <Route path="classes">
                   <Route index element={<ClassesList />} />
-                  <Route path="create" element={<ClassCreate />} />
+                  <Route
+                    path="create"
+                    element={
+                      <CanAccess
+                        resource="classes"
+                        action="create"
+                        fallback={<Navigate to="/classes" replace />}
+                      >
+                        <ClassCreate />
+                      </CanAccess>
+                    }
+                  />
                   <Route path="show/:id" element={<ShowClassDetails />} />
                 </Route>
+
                 <Route path="enrollments" element={<EnrollmentsList />} />
+
                 <Route
                   path="users"
                   element={
