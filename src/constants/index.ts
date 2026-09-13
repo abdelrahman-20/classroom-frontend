@@ -12,6 +12,9 @@ export function requireEnv(key: string, fallbackValue?: string): string {
 }
 
 export const BASE_URL = requireEnv("VITE_BACKEND_URL").replace(/\/+$/, "");
+export const API_BASE_URL = BASE_URL.endsWith("/api")
+  ? BASE_URL
+  : `${BASE_URL}/api`;
 export const CLOUDINARY_URL = requireEnv("VITE_CLOUDINARY_URL", "");
 export const CLOUDINARY_CLOUD_NAME = requireEnv("VITE_CLOUDINARY_CLOUD_NAME");
 export const CLOUDINARY_UPLOAD_PRESET = requireEnv(

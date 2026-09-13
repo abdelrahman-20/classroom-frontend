@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/constants";
+import { API_BASE_URL } from "@/constants";
 import { CreateResponse, ListResponse } from "@/types";
 import {
   CreateParams,
@@ -134,12 +134,15 @@ const options: CreateDataProviderOptions = {
   },
 };
 
-const { dataProvider: baseProvider } = createDataProvider(BASE_URL, options);
+const { dataProvider: baseProvider } = createDataProvider(
+  API_BASE_URL,
+  options,
+);
 
 const dataProvider = {
   ...baseProvider,
   getList: async (params: Parameters<typeof baseProvider.getList>[0]) => {
-    const url = `${BASE_URL}/${params.resource}?${new URLSearchParams(
+    const url = `${API_BASE_URL}/${params.resource}?${new URLSearchParams(
       Object.entries(
         (await options.getList!.buildQueryParams!(params)) as Record<
           string,
@@ -154,14 +157,14 @@ const dataProvider = {
   },
   getOne: async (params: Parameters<typeof baseProvider.getOne>[0]) => {
     const response = await fetchWithCredentials(
-      `${BASE_URL}/${params.resource}/${params.id}`,
+      `${API_BASE_URL}/${params.resource}/${params.id}`,
     );
     const data = await options.getOne!.mapResponse!(response, params);
     return { data };
   },
   create: async (params: CreateParams) => {
     const response = await fetchWithCredentials(
-      `${BASE_URL}/${params.resource}`,
+      `${API_BASE_URL}/${params.resource}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,7 +176,7 @@ const dataProvider = {
   },
   update: async (params: UpdateParams) => {
     const response = await fetchWithCredentials(
-      `${BASE_URL}/${params.resource}/${params.id}`,
+      `${API_BASE_URL}/${params.resource}/${params.id}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -186,7 +189,7 @@ const dataProvider = {
   },
   deleteOne: async (params: DeleteOneParams) => {
     const response = await fetchWithCredentials(
-      `${BASE_URL}/${params.resource}/${params.id}`,
+      `${API_BASE_URL}/${params.resource}/${params.id}`,
       { method: "DELETE" },
     );
 
@@ -200,7 +203,7 @@ const dataProvider = {
         ).toString()}`
       : "";
     const response = await fetchWithCredentials(
-      `${BASE_URL}/${params.url}${query}`,
+      `${API_BASE_URL}/${params.url}${query}`,
       {
         method: params.method ?? "GET",
         headers: {
@@ -218,7 +221,7 @@ const dataProvider = {
     const data = await options.custom!.mapResponse!(response, params);
     return { data };
   },
-  getApiUrl: () => BASE_URL,
+  getApiUrl: () => API_BASE_URL,
 };
 
 export default dataProvider;
