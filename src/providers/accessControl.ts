@@ -1,5 +1,5 @@
 import type { AccessControlProvider } from "@refinedev/core";
-import { authClient } from "@/lib/auth-client";
+import { getCurrentSession } from "@/lib/auth-client";
 import { UserRole } from "@/types";
 
 type Role = UserRole | string | null;
@@ -9,7 +9,7 @@ const notStudent = (role: Role) => role !== UserRole.STUDENT;
 
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getCurrentSession();
     const role = (session?.user as { role?: Role } | undefined)?.role ?? null;
 
     if (!role) return { can: false, reason: "Unauthorized" };

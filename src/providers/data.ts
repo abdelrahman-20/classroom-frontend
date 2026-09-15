@@ -141,6 +141,7 @@ const { dataProvider: baseProvider } = createDataProvider(
 
 const dataProvider = {
   ...baseProvider,
+
   getList: async (params: Parameters<typeof baseProvider.getList>[0]) => {
     const url = `${API_BASE_URL}/${params.resource}?${new URLSearchParams(
       Object.entries(
@@ -155,6 +156,7 @@ const dataProvider = {
     const total = await options.getList!.getTotalCount!(response, params);
     return { data, total };
   },
+
   getOne: async (params: Parameters<typeof baseProvider.getOne>[0]) => {
     const response = await fetchWithCredentials(
       `${API_BASE_URL}/${params.resource}/${params.id}`,
@@ -162,6 +164,7 @@ const dataProvider = {
     const data = await options.getOne!.mapResponse!(response, params);
     return { data };
   },
+
   create: async (params: CreateParams) => {
     const response = await fetchWithCredentials(
       `${API_BASE_URL}/${params.resource}`,
@@ -171,9 +174,11 @@ const dataProvider = {
         body: JSON.stringify(params.variables),
       },
     );
+
     const data = await options.create!.mapResponse!(response, params);
     return { data };
   },
+
   update: async (params: UpdateParams) => {
     const response = await fetchWithCredentials(
       `${API_BASE_URL}/${params.resource}/${params.id}`,
@@ -187,6 +192,7 @@ const dataProvider = {
     const data = await options.update!.mapResponse!(response, params);
     return { data };
   },
+
   deleteOne: async (params: DeleteOneParams) => {
     const response = await fetchWithCredentials(
       `${API_BASE_URL}/${params.resource}/${params.id}`,
@@ -196,6 +202,7 @@ const dataProvider = {
     const data = await options.deleteOne!.mapResponse!(response, params);
     return { data };
   },
+
   custom: async (params: CustomParams) => {
     const query = params.query
       ? `?${new URLSearchParams(
@@ -218,6 +225,7 @@ const dataProvider = {
             : undefined,
       },
     );
+
     const data = await options.custom!.mapResponse!(response, params);
     return { data };
   },

@@ -8,6 +8,19 @@ export const authClient = createAuthClient({
   },
 });
 
+let pendingSessionRequest: Promise<Awaited<ReturnType<typeof authClient.getSession>>> | null =
+  null;
+
+export const getCurrentSession = async () => {
+  if (!pendingSessionRequest) {
+    pendingSessionRequest = authClient.getSession().finally(() => {
+      pendingSessionRequest = null;
+    });
+  }
+
+  return pendingSessionRequest;
+};
+
 export type SessionUser = {
   id: string;
   name: string;

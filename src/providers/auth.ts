@@ -1,5 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
-import { authClient, SessionUser } from "@/lib/auth-client";
+import { authClient, getCurrentSession, SessionUser } from "@/lib/auth-client";
 
 export const authProvider: AuthProvider = {
   login: async ({ email, password, providerName }) => {
@@ -99,7 +99,7 @@ export const authProvider: AuthProvider = {
   },
 
   check: async () => {
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getCurrentSession();
 
     if (session?.user) {
       return { authenticated: true };
@@ -109,12 +109,12 @@ export const authProvider: AuthProvider = {
   },
 
   getPermissions: async () => {
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getCurrentSession();
     return (session?.user as SessionUser | undefined)?.role ?? null;
   },
 
   getIdentity: async () => {
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getCurrentSession();
     const user = session?.user as SessionUser | undefined;
 
     if (!user) return null;
