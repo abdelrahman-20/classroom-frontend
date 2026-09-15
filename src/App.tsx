@@ -5,13 +5,12 @@ import {
   DataProvider,
   Refine,
 } from "@refinedev/core";
-import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
   DocumentTitleHandler,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { Toaster } from "./components/refine-ui/notification/toaster";
@@ -24,7 +23,6 @@ import {
   School,
   Users,
 } from "lucide-react";
-
 import dataProvider from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/accessControl";
@@ -42,6 +40,7 @@ import UsersList from "./pages/users/List";
 import UserCreate from "./pages/users/Create";
 import UserEdit from "./pages/users/Edit";
 import UserShow from "./pages/users/Show";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
   return (
@@ -123,7 +122,7 @@ function App() {
                       <CanAccess
                         resource="subjects"
                         action="create"
-                        fallback={<Navigate to="/subjects" replace />}
+                        fallback={<Unauthorized />}
                       >
                         <SubjectCreate />
                       </CanAccess>
@@ -135,7 +134,7 @@ function App() {
                       <CanAccess
                         resource="subjects"
                         action="edit"
-                        fallback={<Navigate to="/subjects" replace />}
+                        fallback={<Unauthorized />}
                       >
                         <SubjectEdit />
                       </CanAccess>
@@ -151,7 +150,7 @@ function App() {
                       <CanAccess
                         resource="classes"
                         action="create"
-                        fallback={<Navigate to="/classes" replace />}
+                        fallback={<Unauthorized />}
                       >
                         <ClassCreate />
                       </CanAccess>
@@ -168,7 +167,7 @@ function App() {
                     <CanAccess
                       resource="users"
                       action="list"
-                      fallback={<Navigate to="/" replace />}
+                      fallback={<Unauthorized />}
                     >
                       <Outlet />
                     </CanAccess>

@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/select";
 import UploadWidget from "@/components/UploadWidget";
 import { Subject, User } from "@/types";
-// import { subjects, teachers } from "./mock-data";
 
 function ClassCreate() {
   const back = useBack();
@@ -46,6 +45,7 @@ function ClassCreate() {
       action: "create",
     },
   });
+
   const {
     refineCore: { onFinish },
     handleSubmit,
